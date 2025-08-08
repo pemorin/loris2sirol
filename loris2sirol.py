@@ -6,7 +6,7 @@ import logging
 
 """
 
-ETL_loris2sirol is ascript  designed to transfert data from loris tsv files and prepare SQL elements for insertion into sirol. 
+loris2sirol is ascript  designed to transfert data from loris tsv files and prepare SQL elements for insertion into sirol. 
 It prepares a SQL document ready for execution. It assumes that the tsv files are well-formed and uses UTF-8 encoding.
 It also changes the visit part of the uid to the corresponding timepoint based on a mapping defined
 in config.py.
