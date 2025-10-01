@@ -68,3 +68,9 @@ visit_timepoint_mapping = {
     "V41": "t10"
     }
 
+participant_status_mapping = {
+    "Active": "actif",
+    "Incomplete_Lost to Followup": "inactif_perdu_au_suivi_incomplet",
+    "Incomplete_Death": "inactif_décès_incomplet",
+    "Complete": "inactif_perdu_au_suivi_complet"
+}

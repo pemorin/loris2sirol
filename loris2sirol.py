@@ -6,7 +6,7 @@ import logging
 
 """
 
-loris2sirol is ascript  designed to transfert data from loris tsv files and prepare SQL elements for insertion into sirol. 
+ETL_loris2sirol is ascript  designed to transfert data from loris tsv files and prepare SQL elements for insertion into sirol. 
 It prepares a SQL document ready for execution. It assumes that the tsv files are well-formed and uses UTF-8 encoding.
 It also changes the visit part of the uid to the corresponding timepoint based on a mapping defined
 in config.py.
@@ -111,6 +111,10 @@ def get_values(data: list) -> str:
                 value = change_visit_to_timepoint_mapping(value)
             if key == 'date_entree_donnees':
                 value = value[:10]  # Keep only the date part assuming it's in 'YYYY-MM-DD' format
+            if key == 'statut_du_participant':
+                value = convert_participant_status(value)
+            if key == 'details':
+                value = value.replace("'", "ʼ")  # Escape single quotes for SQL
             values_list.append(f"'{value}', ")
         values_string += f"({''.join(values_list)[:-2]}), \n"  # Remove the last comma and space and format for SQL  
     values_string = f"{values_string[:-3]};"  # Remove the last comma and newline and format for SQL
@@ -126,6 +130,14 @@ def change_visit_to_timepoint_mapping(uid: str) -> str:
     timepoint: str = config.visit_timepoint_mapping[uid_parts[2]]  # Assuming the third part is the timepoint
     uid = f"{uid_parts[0]}_{uid_parts[1]}_{timepoint}"
     return uid
+
+def convert_participant_status(status: str) -> str:
+    """
+    Convert the participant status from English to French based on the mapping in config.py.
+    If the status is not found in the mapping, it returns the original status.
+    """
+    statut: str = config.participant_status_mapping[status]
+    return statut
 
 
 def prepare_sql_doc(sql_elements: list) -> str:
@@ -160,8 +172,8 @@ def main() -> None:
     for file in all_tsv_files:
         data: list = read_tsv_file(file)
         sql_elements: list = get_sql_elements(data)
-    sql_doc: str = prepare_sql_doc(sql_elements)
-    write_to_file(sql_doc, f"{sql_elements[0]}.sql", config.data_directory)
+        sql_doc: str = prepare_sql_doc(sql_elements)
+        write_to_file(sql_doc, f"{sql_elements[0]}.sql", config.data_directory)
         
 
 if __name__ == '__main__':
