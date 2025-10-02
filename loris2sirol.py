@@ -60,7 +60,7 @@ def get_sql_elements(data: list) -> list:
     sql_elements: list = []
     table_name: str = get_tablename(data)
     fields_string: str = get_fieldnames(data)
-    values_string: str = get_values(data)
+    values_string: str = get_values(data, table_name)
     sql_elements.append(table_name)
     sql_elements.append(fields_string)
     sql_elements.append(values_string)
@@ -92,7 +92,7 @@ def get_fieldnames(data) -> str:
     return fields_string
 
 
-def get_values(data: list) -> str:
+def get_values(data: list, table_name: str) -> str:
     """
     Get the values from data[2] and return them as a string formatted for SQL insertion.
     This function assumes that data[2] contains the rows of the TSV file.
@@ -104,15 +104,22 @@ def get_values(data: list) -> str:
     """
     values_string: str = ""
     values_list: list = []
+    # Data mapping for specific fields
     for row in data[2]:
         values_list = []
         for key, value in row.items():
             if key == 'uid':
-                value = change_visit_to_timepoint_mapping(value)
+                value = process_uid(value, table_name)
             if key == 'date_entree_donnees':
                 value = value[:10]  # Keep only the date part assuming it's in 'YYYY-MM-DD' format
             if key == 'statut_du_participant':
-                value = convert_participant_status(value)
+                value = convert_participant_status(value, table_name)
+            if key == 'sexe':
+                value = config.sex_mapping.get(value, "donnée_non_disponible")
+            if key == 'id_utilisateur':
+                value = convert_userid(value)
+            if key == 'site_de_recrutement':
+                value = config.site_mapping.get(value, "donnée_non_disponible")
             if key == 'details':
                 value = value.replace("'", "ʼ")  # Escape single quotes for SQL
             values_list.append(f"'{value}', ")
@@ -121,7 +128,21 @@ def get_values(data: list) -> str:
     return values_string
 
 
-def change_visit_to_timepoint_mapping(uid: str) -> str:
+def process_uid(uid: str, table_name: str) -> str:
+    """
+    Process the UID to ensure it is in the correct format.
+    This function assumes that the UID is in the format 'subject_evaluation_visit' for data tables
+    and 'subject_dob_sex' for participant tables.
+    It returns the UID as a string.
+    """
+    # get tsv file name
+    if table_name in ("participant", "participant_historique_statut"):
+        return uid
+    else:
+        return convert_visit_to_timepoint_mapping(uid)
+
+
+def convert_visit_to_timepoint_mapping(uid: str) -> str:
     """
     Change the visit part of the UID to the corresponding timepoint based on the mapping in config.py.
     Assumes the UID is in the format 'subject_evaluation_timepoint' and that the visit part is the third part of the UID.
@@ -131,13 +152,24 @@ def change_visit_to_timepoint_mapping(uid: str) -> str:
     uid = f"{uid_parts[0]}_{uid_parts[1]}_{timepoint}"
     return uid
 
-def convert_participant_status(status: str) -> str:
+def convert_participant_status(status: str, table_name: str) -> str:
     """
-    Convert the participant status from English to French based on the mapping in config.py.
+    Convert the participant status from loris to sirol based on the mapping in config.py.
     If the status is not found in the mapping, it returns the original status.
     """
-    statut: str = config.participant_status_mapping[status]
-    return statut
+    if table_name == "participant":
+        return config.participant_status_mapping[status] # We want it yield an error if not found
+    else:
+        return status # For historique_statut we keep the original value
+
+
+def convert_userid(userid: str) -> str:
+    """
+    Convert the userid from LORIS to SIROL based on the mapping in config.py.
+    If the userid is not found in the mapping, it returns userid.
+    """
+    sirol_userid: str = config.userid_mapping.get(userid, userid)
+    return sirol_userid
 
 
 def prepare_sql_doc(sql_elements: list) -> str:

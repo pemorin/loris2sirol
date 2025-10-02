@@ -21,8 +21,43 @@ sql_code_directory = "./sirol_sql/"
 # List of files to remove from main excel directory
 files_to_remove = [":Zone.Identifier", ".xls"]
 
-# Visit vs timepoint mapping
+
+# LORIS to SIROL field mapping
 # loris_visit : sirol_timepoint
+
+# Sex mapping
+sex_mapping = {
+    "Male": "homme",
+    "Female": "femme"
+    }
+
+# userid mapping
+userid_mapping = {
+    "": "donnée_non_disponible",
+    "pemorin": "admin",
+    "iminoiu_criugm": "iminoiu",
+    "iminoiu_jgh": "iminoiu",
+    "avoinescu_iugm": "avoinescu",
+    "amorinville_chus": "amorinville",
+    "cdube2": "cdube",
+    "njaffer_iugm": "njaffer",
+    "iarsenault_jgh": "iarsenault",
+    "iarsenault_cinq": "iarsenault",
+    "iarsenault_chus": "iarsenault",
+    "jgagnon_criumg": "jgagnon",
+    "pbezeau_jgh": "pbezeau"
+    }
+
+# MRI_alias mapping
+site_mapping = {
+    "IUGM": "criugm",
+    "CHUS": "chus",
+    "CINQ": "cinq",
+    "MNI":  "mni",
+    "JGH": "jgh"
+    }
+
+# Visit vs timepoint mapping
 visit_timepoint_mapping = {
     "QAU": "qau",
     "V01": "t00",
