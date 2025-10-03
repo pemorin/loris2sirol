@@ -60,6 +60,7 @@ site_mapping = {
 # Visit vs timepoint mapping
 visit_timepoint_mapping = {
     "QAU": "qau",
+    "V00": "t00",
     "V01": "t00",
     "V02": "t00",
     "V03": "t00",
@@ -100,7 +101,8 @@ visit_timepoint_mapping = {
     "V38": "t10",
     "V39": "t10",
     "V40": "t10",
-    "V41": "t10"
+    "V41": "t10",
+    "V99": "t99"
     }
 
 participant_status_mapping = {
