@@ -118,10 +118,12 @@ def get_values(data: list, table_name: str) -> str:
                 value = config.sex_mapping.get(value, "donnée_non_disponible")
             if key == 'id_utilisateur':
                 value = convert_userid(value)
-            if key == 'site_de_recrutement':
+            if key in ('site_de_recrutement', 'site'):
                 value = config.site_mapping.get(value, "donnée_non_disponible")
             if key == 'details':
                 value = value.replace("'", "ʼ")  # Escape single quotes for SQL
+            if key == 'timepoint':
+                value = config.visit_timepoint_mapping[value]  # We want this to yield an error if not found
             values_list.append(f"'{value}', ")
         values_string += f"({''.join(values_list)[:-2]}), \n"  # Remove the last comma and space and format for SQL  
     values_string = f"{values_string[:-3]};"  # Remove the last comma and newline and format for SQL
@@ -131,13 +133,17 @@ def get_values(data: list, table_name: str) -> str:
 def process_uid(uid: str, table_name: str) -> str:
     """
     Process the UID to ensure it is in the correct format.
-    This function assumes that the UID is in the format 'subject_evaluation_visit' for data tables
-    and 'subject_dob_sex' for participant tables.
+    This function assumes that the UID is in the format'subject_dob_sex' for participant tables and 
+    'subject_evaluation_visit' for session and data tables.
     It returns the UID as a string.
     """
     # get tsv file name
     if table_name in ("participant", "participant_historique_statut"):
-        return uid
+        # parsing/mapping for sex
+        uid_parts: list = uid.split('_')
+        sex: str = config.sex_mapping[uid_parts[2]] # We want this to yield an error if not found
+        new_uid: str = f"{uid_parts[0]}_{uid_parts[1]}_{sex}"
+        return new_uid
     else:
         return convert_visit_to_timepoint_mapping(uid)
 
@@ -145,10 +151,10 @@ def process_uid(uid: str, table_name: str) -> str:
 def convert_visit_to_timepoint_mapping(uid: str) -> str:
     """
     Change the visit part of the UID to the corresponding timepoint based on the mapping in config.py.
-    Assumes the UID is in the format 'subject_evaluation_timepoint' and that the visit part is the third part of the UID.
+    Assumes the UID is in the format 'subject_timepoint' and that the visit part is the third part of the UID.
     """
     uid_parts: list = uid.split('_')
-    timepoint: str = config.visit_timepoint_mapping[uid_parts[2]]  # Assuming the third part is the timepoint
+    timepoint: str = config.visit_timepoint_mapping[uid_parts[2]]  # Assuming the secont part is the timepoint
     uid = f"{uid_parts[0]}_{uid_parts[1]}_{timepoint}"
     return uid
 
@@ -158,7 +164,7 @@ def convert_participant_status(status: str, table_name: str) -> str:
     If the status is not found in the mapping, it returns the original status.
     """
     if table_name == "participant":
-        return config.participant_status_mapping[status] # We want it yield an error if not found
+        return config.participant_status_mapping[status] # We want this to yield an error if not found
     else:
         return status # For historique_statut we keep the original value
 
