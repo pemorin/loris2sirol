@@ -118,12 +118,17 @@ def get_values(data: list, table_name: str) -> str:
                 value = config.sex_mapping.get(value, "donnée_non_disponible")
             if key == 'id_utilisateur':
                 value = convert_userid(value)
+            if key == 'id_evaluateur':
+                value = convert_examiner(value)
             if key in ('site_de_recrutement', 'site'):
                 value = config.site_mapping.get(value, "donnée_non_disponible")
-            if key == 'details':
-                value = value.replace("'", "ʼ")  # Escape single quotes for SQL
             if key == 'timepoint':
                 value = config.visit_timepoint_mapping[value]  # We want this to yield an error if not found
+            # Escape single quotes for SQL
+            substrings_to_check: list = ['detail', 'verbatim', 'commentaire', 'evaluateur'] # Fields that may contain single quotes
+            for substring in substrings_to_check:
+                if substring in key:
+                    value = value.replace("'", "ʼ")
             values_list.append(f"'{value}', ")
         values_string += f"({''.join(values_list)[:-2]}), \n"  # Remove the last comma and space and format for SQL  
     values_string = f"{values_string[:-3]};"  # Remove the last comma and newline and format for SQL
@@ -176,6 +181,14 @@ def convert_userid(userid: str) -> str:
     """
     sirol_userid: str = config.userid_mapping.get(userid, userid)
     return sirol_userid
+
+def convert_examiner(examiner: str) -> str:
+    """
+    Convert the examiner from LORIS to SIROL based on the mapping in config.py.
+    If the examiner is not found in the mapping, it returns examiner.
+    """
+    sirol_examiner: str = config.examiner_mapping.get(examiner, examiner)
+    return sirol_examiner
 
 
 def prepare_sql_doc(sql_elements: list) -> str:
