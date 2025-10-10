@@ -125,7 +125,7 @@ def get_values(data: list, table_name: str) -> str:
             if key == 'timepoint':
                 value = config.visit_timepoint_mapping[value]  # We want this to yield an error if not found
             # Escape single quotes for SQL
-            substrings_to_check: list = ['detail', 'verbatim', 'commentaire', 'evaluateur'] # Fields that may contain single quotes
+            substrings_to_check: list = ['detail', 'verbatim', 'commentaire', 'evaluateur', 'cigarette'] # Fields that may contain single quotes
             for substring in substrings_to_check:
                 if substring in key:
                     value = value.replace("'", "ʼ")
