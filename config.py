@@ -169,3 +169,9 @@ participant_status_mapping = {
     "Incomplete_Death": "inactif_décès_incomplet",
     "Complete": "inactif_perdu_au_suivi_complet"
 }
+
+statut_entree_donnees_mapping = {
+    "Complete": "complet",
+    "Incomplete": "incomplet",
+    "Invalid": "invalide"
+}

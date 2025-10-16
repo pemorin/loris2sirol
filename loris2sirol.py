@@ -114,6 +114,8 @@ def get_values(data: list, table_name: str) -> str:
                 value = value[:10]  # Keep only the date part assuming it's in 'YYYY-MM-DD' format
             if key == 'statut_du_participant':
                 value = convert_participant_status(value, table_name)
+            if key == 'statut_entree_donnees':
+                value = config.statut_entree_donnees_mapping[value]  # We want this to yield an error if not found
             if key == 'sexe':
                 value = config.sex_mapping.get(value, "donnée_non_disponible")
             if key == 'id_utilisateur':
@@ -125,7 +127,7 @@ def get_values(data: list, table_name: str) -> str:
             if key == 'timepoint':
                 value = config.visit_timepoint_mapping[value]  # We want this to yield an error if not found
             # Escape single quotes for SQL
-            substrings_to_check: list = ['detail', 'verbatim', 'commentaire', 'evaluateur', 'cigarette'] # Fields that may contain single quotes
+            substrings_to_check: list = ['detail', 'verbatim', 'commentaire', 'evaluateur', 'cigarette', 'observation'] # Fields that may contain single quotes
             for substring in substrings_to_check:
                 if substring in key:
                     value = value.replace("'", "ʼ")
