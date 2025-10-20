@@ -110,24 +110,34 @@ def get_values(data: list, table_name: str) -> str:
         for key, value in row.items():
             if key == 'uid':
                 value = process_uid(value, table_name)
-            if key == 'date_entree_donnees':
+            elif key == 'date_entree_donnees':
                 value = value[:10]  # Keep only the date part assuming it's in 'YYYY-MM-DD' format
-            if key == 'statut_du_participant':
+            elif key == 'statut_du_participant':
                 value = convert_participant_status(value, table_name)
-            if key == 'statut_entree_donnees':
+            elif key == 'statut_entree_donnees':
                 value = config.statut_entree_donnees_mapping[value]  # We want this to yield an error if not found
-            if key == 'sexe':
+            elif key == 'sexe':
                 value = config.sex_mapping.get(value, "donnée_non_disponible")
-            if key == 'id_utilisateur':
+            elif key == 'id_utilisateur':
                 value = convert_userid(value)
-            if key == 'id_evaluateur':
+            elif key == 'id_evaluateur':
                 value = convert_examiner(value)
-            if key in ('site_de_recrutement', 'site'):
+            elif key in ('site_de_recrutement', 'site'):
                 value = config.site_mapping.get(value, "donnée_non_disponible")
-            if key == 'timepoint':
+            elif key == 'timepoint':
                 value = config.visit_timepoint_mapping[value]  # We want this to yield an error if not found
             # Escape single quotes for SQL
-            substrings_to_check: list = ['detail', 'verbatim', 'commentaire', 'evaluateur', 'cigarette', 'observation'] # Fields that may contain single quotes
+            substrings_to_check: list = [
+                'detail',
+                'verbatim',
+                'commentaire',
+                'evaluateur',
+                'cigarette',
+                'observation',
+                'specifie',
+                'autre',
+                'precision',
+                'decrire'] # Fields containing those substrings may contain single quotes
             for substring in substrings_to_check:
                 if substring in key:
                     value = value.replace("'", "ʼ")
