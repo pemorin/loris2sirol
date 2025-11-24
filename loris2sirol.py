@@ -6,12 +6,14 @@ import logging
 
 """
 
-ETL_loris2sirol is ascript  designed to transfert data from loris tsv files and prepare SQL elements for insertion into sirol. 
+loris2sirol is a script  designed to transfert data from loris tsv files and prepare SQL elements for insertion into sirol. 
 It prepares a SQL document ready for execution. It assumes that the tsv files are well-formed and uses UTF-8 encoding.
-It also changes the visit part of the uid to the corresponding timepoint based on a mapping defined
-in config.py.
+It also changes the visit part of the uid (used by loris) to the corresponding timepoint (used by sirol)
+based on a mapping defined in config.py.
 
 This script is designed to be run ONCE as a standalone program and does not require any external dependencies.
+
+It is highly recommended to run loris2sirol_compare.py after this script to ensure that the data has been correctly transformed.
 """
 
 def get_all_tsv_files(path: str) -> list:
@@ -137,7 +139,13 @@ def get_values(data: list, table_name: str) -> str:
                 'specifie',
                 'autre',
                 'precision',
-                'decrire'] # Fields containing those substrings may contain single quotes
+                'decrire',
+                'remarque',
+                'comment',
+                'traitement',
+                'cognitive',
+                'apprentisage',
+                'type'] # Fields containing those substrings may contain single quotes
             for substring in substrings_to_check:
                 if substring in key:
                     value = value.replace("'", "ʼ")
